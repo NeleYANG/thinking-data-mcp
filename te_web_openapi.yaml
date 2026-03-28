@@ -1,0 +1,339 @@
+openapi: 3.1.0
+info:
+  title: ThinkingEngine API Server
+  description: ThinkingEngine（数数科技）数据平台 API 服务
+  version: 1.0.0
+servers:
+  - url: （你的数数平台服务网址）
+paths:
+  /:
+    get:
+      tags:
+        - Root
+      summary: Root
+      description: API 根路径，返回服务信息
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/today:
+    get:
+      tags:
+        - 基础工具
+      summary: Get Today
+      description: 获取今天的准确日期
+      operationId: get_today_api_today_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /api/events:
+    get:
+      tags:
+        - 数据查询
+      summary: Get Events
+      description: 获取数数项目中上报的所有可用的事件
+      operationId: get_events_api_events_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /api/properties:
+    get:
+      tags:
+        - 数据查询
+      summary: Get Properties
+      description: 获取数数项目中所有可用的事件属性和用户属性，属性通常用于指标查询中的分组项
+      operationId: get_properties_api_properties_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /api/event-analyze:
+    post:
+      tags:
+        - 数据分析
+      summary: Event Analyze
+      description: |-
+        数数项目事件查询
+
+        查询参数示例:
+        ```json
+        {
+            "eventView": {
+                "comparedByTime": false,
+                "endTime": "2025-12-08 23:59:59",
+                "filts": [{
+                    "columnDesc": "产品类型(订单)",
+                    "columnName": "event_name_placeholder",
+                    "comparator": "equal",
+                    "filterType": "SIMPLE",
+                    "ftv": ["会员产品"],
+                    "specifiedClusterDate": "2025-12-09",
+                    "subTableType": "",
+                    "tableType": "event",
+                    "timeUnit": ""
+                }],
+                "groupBy": [],
+                "recentDay": "1-7",
+                "relation": "and",
+                "startTime": "2025-12-02 00:00:00",
+                "timeParticleSize": "day"
+            },
+            "events": [{
+                "analysis": "TOTAL_TIMES",
+                "analysisParams": "",
+                "eventName": "handle_pay_success",
+                "eventNameDisplay": "订单订购.总次数",
+                "eventUuid": "bD3vYvU8",
+                "filts": [],
+                "quota": "",
+                "relation": "and",
+                "type": "normal"
+            }],
+            "projectId": 3
+        }
+        ```
+      operationId: event_analyze_api_event_analyze_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventAnalyzeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/sql-analyze:
+    post:
+      tags:
+        - 数据分析
+      summary: Sql Analyze
+      description: >-
+        通过 SQL 查询数数项目中的数据
+
+
+        SQL 需要符合 Trino 标准。
+
+
+        返回格式示例:
+
+        ```
+
+        {"data":{"headers":["mt_tag","daka_order_count"]},"return_code":0,"return_message":"success","showStackMessage":false}
+
+        ["APP首次购买订单",5229]
+
+        ["APP召回会员",1775]
+
+        ```
+      operationId: sql_analyze_api_sql_analyze_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SqlAnalyzeRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/sql-template:
+    post:
+      tags:
+        - 工具
+      summary: Generate Sql Template
+      description: |-
+        生成用于查询数数项目数据的 SQL 模板
+
+        SQL 需要符合 Trino 标准，可修改后用于调用 sql-analyze 接口实际查询。
+
+        支持的场景:
+      operationId: generate_sql_template_api_sql_template_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateSqlTemplateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  '/api/color/{num}':
+    get:
+      tags:
+        - 测试工具
+      summary: Get Color
+      description: 获取指定号码盒子中球的颜色（测试工具）
+      operationId: get_color_api_color__num__get
+      parameters:
+        - name: num
+          in: path
+          required: true
+          schema:
+            type: integer
+            maximum: 5
+            minimum: 1
+            description: 盒子的号码，必须为 1-5 中的整数
+            title: Num
+          description: 盒子的号码，必须为 1-5 中的整数
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    ApiResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: 请求是否成功
+        data:
+          title: Data
+          description: 响应数据
+        message:
+          type: string
+          title: Message
+          description: 响应消息
+          default: ''
+        error:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Error
+          description: 错误信息
+      type: object
+      required:
+        - success
+        - data
+        - message
+        - error
+      title: ApiResponse
+      description: 统一 API 响应模型
+    EventAnalyzeRequest:
+      properties:
+        eventView:
+          type: object
+          title: Eventview
+          description: 事件视图配置
+        events:
+          items: {}
+          type: array
+          title: Events
+          description: 事件列表
+        projectId:
+          type: integer
+          title: Projectid
+          description: 项目ID
+          default: 3
+      type: object
+      required:
+        - eventView
+        - events
+      title: EventAnalyzeRequest
+      description: 事件查询请求模型
+    GenerateSqlTemplateRequest:
+      properties:
+        scene:
+          type: string
+          title: Scene
+          description: 查询场景，必须为 "指定日期的书本的学习人数"、"指定日期的系列的学习人数"、"指定日期的背单词学习人数" 中的一项
+          examples:
+            - 指定日期的书本的学习人数
+      type: object
+      required:
+        - scene
+      title: GenerateSqlTemplateRequest
+      description: 生成 SQL 模板请求模型
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    SqlAnalyzeRequest:
+      properties:
+        sql:
+          type: string
+          title: Sql
+          description: SQL 查询语句，需要符合 Trino 标准
+      type: object
+      required:
+        - sql
+      title: SqlAnalyzeRequest
+      description: SQL 查询请求模型
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
